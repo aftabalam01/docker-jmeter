@@ -3,7 +3,7 @@
 #### how to use this docker ####
 # not code change and just need to run docker with existing script?
 # docker build -t aftabalam01/myapp-jmeter-4.0 -f DockerFile_Jmeter_myapp
-# docker pull aftabalam01/tabid-jmeter-4.0:latest
+# docker pull aftabalam01/myapp-jmeter-4.0:latest
 # option1 - run in interactive mode
 # docker run --rm -it -e AWS_REGION=US-WEST-2 aftabalam01/myapp-jmeter-4.0:latest /bin/bash
 #./sample_launch.sh <jmeter args>
