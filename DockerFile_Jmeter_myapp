@@ -1,0 +1,31 @@
+# 1
+#FROM aftabalam01/jmeter-4.0:latest
+
+# 2
+LABEL maintainer="aalam@tableau.com"
+# 3
+
+COPY  ./sample_launch.sh .
+RUN ls -lrt \
+&& chmod 777 sample_launch.sh \
+&& export AWS_SHARED_CREDENTIALS_FILE=/root.aws/credentials \
+&& export AWS_REGION=${AWS_REGION}
+# 4 copy any project specific
+ADD lib/ext ${JMETER_PLUGINS_FOLDER}
+ADD bin  ${JMETER_BIN}
+ADD scripts ${JMETER_HOME}/scripts
+ADD testdata ${JMETER_HOME}/testdata
+
+# 5
+#ENTRYPOINT ["./sample_launch.sh"]
+
+#### how to use this docker ####
+# not code change and just need to run docker with existing script?
+# docker build -t aftabalam01/myapp-jmeter-4.0 -f DockerFile_Jmeter_myapp
+# docker pull aftabalam01/tabid-jmeter-4.0:latest
+# option1 - run in interactive mode
+# docker run --rm -it -e AWS_REGION=US-WEST-2 aftabalam01/myapp-jmeter-4.0:latest /bin/bash
+#./sample_launch.sh <jmeter args>
+# OR 
+# docker run --rm -it -v c:\users\<usename>\.aws\:/root/.aws/ -e AWS_REGION=us-west-2 tabid-jmeter-4.0:latest ./sample_launch.sh <jmeter args>
+# if this docker is run on aws ecs or EC2 with correct IAM, we do not have to pass credentials

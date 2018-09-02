@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="4.0" jmeter="4.0 r1823414">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="TESTPLAN" elementType="Argument">
+            <stringProp name="Argument.name">TESTPLAN</stringProp>
+            <stringProp name="Argument.value">test.jmx</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="TESTNAME" elementType="Argument">
+            <stringProp name="Argument.name">TESTNAME</stringProp>
+            <stringProp name="Argument.value">LoadTEST</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="APPLICATIONNAME" elementType="Argument">
+            <stringProp name="Argument.name">APPLICATIONNAME</stringProp>
+            <stringProp name="Argument.value">TABID</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="BUILDNUMBER" elementType="Argument">
+            <stringProp name="Argument.name">BUILDNUMBER</stringProp>
+            <stringProp name="Argument.value">4.1.10</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Sample Thread" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">10</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="GetVariable" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import java.util.Map;
+String jMeterVars;
+jMeterVars = &quot;Quantity of variables: &quot; + vars.entrySet().size() + &quot;.\n\n&quot;;
+jMeterVars += &quot;[VARIABLE NAME]      ==&gt;&gt;      [VARIABLE VALUE]\n\n&quot;;
+for (Map.Entry entry : vars.entrySet()) {
+    jMeterVars += entry.getKey() + &quot;  ==&gt;&gt;  &quot; + entry.getValue().toString() + &quot;\n&quot;;
+    }
+    try {
+        log.info(&quot;List of Variables are: \n\n&quot;);
+        log.info(jMeterVars);
+        } catch(Exception e) {
+            System.err.println(&quot;IOException: &quot; + e.getMessage());
+            }
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <JSR223Listener guiclass="TestBeanGUI" testclass="JSR223Listener" testname="SendMetrics to SQS" enabled="true">
+        <stringProp name="cacheKey">true</stringProp>
+        <stringProp name="filename"></stringProp>
+        <stringProp name="parameters"> Sampleloadtest  LoadTest TABID 4.10 eats_jmeter_metrics</stringProp>
+        <stringProp name="script">import com.tab.jmeter.utils.SQSMessage;
+import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jmeter.samplers.SampleResult;
+import java.net.*;
+import java.io.*;
+
+String QUEUE_NAME
+
+if(Parameters){
+	
+	vars.put(&quot;TESTPLAN&quot;,args[0])
+	vars.put(&quot;TESTNAME&quot;,args[1])
+	vars.put(&quot;APPLICATIONNAME&quot;,args[2])
+	vars.put(&quot;BUILDNUMBER&quot;,args[3])
+}
+
+if(Parameters &amp;&amp; args[4]){
+	 QUEUE_NAME = args[4];
+
+} else {
+	 QUEUE_NAME= &quot;eats_jmeter_metrics&quot;;
+}
+
+// build json results msg that can be posted AWS SQL via http end 
+// see all available options https://jmeter.apache.org/api/org/apache/jmeter/samplers/SampleResult.html
+
+String  results_msg = &quot;{\&quot;TimeStamp\&quot;:&quot; + prev.getTimeStamp() + 
+				   &quot;, \&quot;TESTPLAN\&quot;:\&quot;&quot;+ vars.get(&quot;TESTPLAN&quot;) + &quot;\&quot;&quot;+
+				   &quot;, \&quot;TESTNAME\&quot;:\&quot;&quot;+ vars.get(&quot;TESTNAME&quot;) + &quot;\&quot;&quot;+
+				   &quot;, \&quot;APPLICATIONNAME\&quot;:\&quot;&quot;+ vars.get(&quot;APPLICATIONNAME&quot;) + &quot;\&quot;&quot;+
+				   &quot;, \&quot;BUILDNUMBER\&quot;:\&quot;&quot;+ vars.get(&quot;BUILDNUMBER&quot;) + &quot;\&quot;&quot;+
+				   &quot;, \&quot;Transaction\&quot;:\&quot;&quot;+ prev.getSampleLabel() + &quot;\&quot;&quot;+
+				   &quot;, \&quot;Time\&quot;:&quot;  + String.valueOf(prev.getTime()) +
+				   &quot;, \&quot;Btyes\&quot;:&quot;  + String.valueOf(prev.getBytesAsLong()) +
+				   &quot;, \&quot;Connect Time\&quot;:&quot;  + String.valueOf(prev.getConnectTime()) +
+				   &quot;, \&quot;Error Count\&quot;:&quot;  + String.valueOf(prev.getErrorCount()) +
+				   &quot;, \&quot;Latency\&quot;:&quot;  + String.valueOf(prev.getLatency()) +
+				   &quot;, \&quot;Count\&quot;:&quot;  + String.valueOf(prev.getSampleCount()) +
+				   &quot;, \&quot;URL\&quot;:&quot;  + String.valueOf(prev.getURL()) +
+				   &quot;, \&quot;Success\&quot;:&quot;  + String.valueOf(prev.isSuccessful()) +
+				   &quot;, \&quot;ResponseCode\&quot;:&quot;  + String.valueOf(prev.getResponseCode()) +
+				   &quot;, \&quot;ResponseMessage\&quot;:&quot;  + String.valueOf(prev.getResponseMessage()) +
+				   &quot;, \&quot;TransactionGroup\&quot;:\&quot;&quot; + String.valueOf(prev.getSampleLabel(true)) + &quot;\&quot;&quot;+
+				   &quot;, \&quot;ThreadNumber\&quot;:&quot;  + String.valueOf(prev.getThreadName()) +
+					&quot;}&quot;
+//log.info(&quot;results string is&quot; +  results_msg);
+
+
+
+SQSMessage sqs_msg = new SQSMessage(QUEUE_NAME,results_msg);
+sqs_msg.Send();</stringProp>
+        <stringProp name="scriptLanguage">groovy</stringProp>
+        <stringProp name="TestPlan.comments">Please pass TESTPLAN ,TESTName,APPLICATIONNAME  buildnumber and SQSqueue. this will be added in results for better trending and analysis.e.g. &apos;Sampleloadtest  LoadTest TABID 4.10 eats_jmeter_metrics&apos;</stringProp>
+      </JSR223Listener>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

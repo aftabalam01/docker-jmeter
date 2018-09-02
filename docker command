@@ -1,0 +1,3 @@
+docker run -it tabid-jmeter-4.0 bash
+docker build -t tabid-jmeter-4.0 -f DockerFile_Jmeter_TabID .
+docker run --rm -it -v c:\users\<usename>\.aws\:/root/.aws/ -e AWS_REGION=us-west-2 tabid-jmeter-4.0:latest ./sample_launch.sh <jmeter args>
